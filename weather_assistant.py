@@ -5,10 +5,11 @@ import os
 from typing import List, Optional
 from dotenv import load_dotenv
 
-from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
+from langchain_core.messages import HumanMessage, AIMessage
 from langchain_openai import ChatOpenAI
-from langchain_core.tools import Tool
 from langchain.agents import create_agent
+
+from tool.hotel_tool import HotelTool
 
 # 加载环境变量
 load_dotenv()
@@ -30,10 +31,10 @@ class WeatherAssistant:
             raise ValueError("未找到 DeepSeek API 密钥，请设置 DEEPSEEK_API_KEY 环境变量")
         
         # 导入天气工具
-        from weather_tool import WeatherTool
+        from tool.weather_tool import WeatherTool
         
         # 初始化工具列表
-        self.tools = [WeatherTool()]
+        self.tools = [WeatherTool(),HotelTool()]
         
         # 初始化 LLM (使用 DeepSeek OpenAI 兼容 API)
         self.llm = ChatOpenAI(
@@ -46,16 +47,16 @@ class WeatherAssistant:
         )
         
         # 创建 system prompt
-        self.system_prompt = """你是一个友好的天气助手，专门帮助用户查询天气信息。
+        self.system_prompt = """你是一个友好的生活助手，专门解答用户的提问信息。
 你可以：
-1. 查询任何城市的当前天气
-2. 提供温度、湿度、风速等详细天气数据
-3. 给出基于天气的穿衣和活动建议
+1. 查询任何城市的当前天气，提供温度、湿度、风速等详细天气数据，给出基于天气的穿衣和活动建议
+2. 查询任何城市的酒店信息，提供价格，剩余房间数量，并给出相应的入住建议
+3. 查询任何城市的新闻，并分析新闻内容给出相应的评论和提醒
 
-请使用中文与用户交流。在调用天气查询工具之前，先确认用户要查询的城市名称。
+请使用中文与用户交流。在调用查询工具之前，先确认用户要查询的城市名称。
 如果用户没有指定城市，请礼貌地询问他们想查询哪个城市。
 
-记住要保持友好、专业的态度，并在提供天气信息后给出一些实用的建议。"""
+记住要保持友好、专业的态度，并在提供信息后给出一些实用的建议。"""
         
         # 创建 agent (使用新版 LangChain API)
         self.agent = create_agent(

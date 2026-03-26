@@ -39,7 +39,7 @@ def test_weather_tool():
     print("=" * 60)
     
     try:
-        from weather_tool import get_weather
+        from tool.weather_tool import get_weather
         
         print("正在查询北京天气...")
         result = get_weather("Beijing")
